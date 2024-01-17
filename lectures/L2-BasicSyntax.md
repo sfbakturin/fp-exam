@@ -166,11 +166,11 @@ a ==> b = not a || b -- `a ==> b` эквивалентно `(==>) a b`
 Итого, по ассоцитивности оператор в Haskell получается следующее:
 
 $$
-\begin{align*}
+\begin{aligned}
 \mathtt{infixl} : a \circ b \circ c \circ d &\equiv ((a \circ b) \circ c) \circ d \\
 \mathtt{infixr} : a \circ b \circ c \circ d &\equiv a \circ (b \circ (c \circ d)) \\
 \mathtt{infix} : a \circ b \circ c \circ d &\equiv \textit{Compilation error}
-\end{align*}
+\end{aligned}
 $$
 
 Для последнего нам придется сами расставлять скобки.

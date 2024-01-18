@@ -5,7 +5,7 @@
 * [Лекция №2: Basic Syntax](lectures/L2-BasicSyntax.md)
 * Лекция №3: Datas, Classes, Instances
 * [Лекция №4: Basic typeclasses: Monoid. Functor. Applicative](lectures/L4-MonoidFunctorApplicative.md)
-* Лекция №5: Monads
+* [Лекция №5: Monads](lectures/L5-Monads.md)
 * Лекция №6: RealWorld
 * Лекция №7: Monad Transformers
 * Лекция №8: Speeding up Haskell

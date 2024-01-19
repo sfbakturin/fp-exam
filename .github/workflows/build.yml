@@ -1,0 +1,27 @@
+name: fp-exam
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+      options: --privileged
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: dependencies
+        run: |
+          apt-get update
+          apt-get install texlive-xetex texlive-fonts-recommended pandoc -y
+      - name: setup
+        uses: actions/checkout@v3
+      - name: build
+        run: bash build.sh
+      - name: publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: lectures
+          path: ./lectures/*.pdf
+          retention-days: 7
+          if-no-files-found: error

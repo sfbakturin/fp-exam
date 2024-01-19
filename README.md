@@ -6,7 +6,7 @@
 * Лекция №3: Datas, Classes, Instances
 * [Лекция №4: Basic typeclasses: Monoid. Functor. Applicative](lectures/L4-MonoidFunctorApplicative.md)
 * [Лекция №5: Monads](lectures/L5-Monads.md)
-* Лекция №6: RealWorld
+* [Лекция №6: RealWorld](lectures/L6-RealWorld.md)
 * Лекция №7: Monad Transformers
 * Лекция №8: Speeding up Haskell
 * Лекция №9: Parallel and Concurrent Haskell

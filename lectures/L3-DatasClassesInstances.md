@@ -45,12 +45,12 @@
 
 Мы научимся:
 
-* Создавать свои собственные типы данных
-* Алгебраические типы данных (ADT)
-* Record, NewType - разные сопосбы создать свои типы данных в Haskell
-* Type классы
-* Полиморфизм
-* Модули
+- Создавать свои собственные типы данных
+- Алгебраические типы данных (ADT)
+- Record, NewType - разные сопосбы создать свои типы данных в Haskell
+- Type классы
+- Полиморфизм
+- Модули
 
 ## Custom types
 
@@ -199,8 +199,8 @@ data User = MkUser Int String String
  └ "data" keyword
 ```
 
-* `User` - имя типа
-* `MkUser` - имя конструктора
+- `User` - имя типа
+- `MkUser` - имя конструктора
 
 > *Конструкторы это просто функции*
 
@@ -241,9 +241,9 @@ ghci> nub $ map getName users  -- unique names
 data Point2D a = Point2D a a  -- constructor name can be the same as type name
 ```
 
-* `a` - параметр типа (что-то аля шаблонов в c++)
-* `Point2D` - имя типа
-* `Point2D` - имя конструктора
+- `a` - параметр типа (что-то аля шаблонов в c++)
+- `Point2D` - имя типа
+- `Point2D` - имя конструктора
 
 Тут имя типа совпадает с именем конструктора (компилятор из контекста понимает использовать тип или конструктор)
 
@@ -286,8 +286,8 @@ data IntResult = Success Int
                | Failure String
 ```
 
-* `IntResult` - имя типа
-* `Success`/`Failure` - имена конструкторов
+- `IntResult` - имя типа
+- `Success`/`Failure` - имена конструкторов
 
 ```haskell
 ghci> :t Success 
@@ -323,10 +323,10 @@ ghci> showResult $ safeDiv 7 0
 data Vector a = Vector2D a a | Vector3D a a a
 ```
 
-* `Vector` - имя типа
-* `a` - параметр типа (что-то аля шаблонов в c++)
-* `Vector2D` - имя конструктора
-* `Vector3D` - имя конструктора
+- `Vector` - имя типа
+- `a` - параметр типа (что-то аля шаблонов в c++)
+- `Vector2D` - имя конструктора
+- `Vector3D` - имя конструктора
 
 ```haskell
 packVector :: Vector a -> [a]
@@ -385,8 +385,8 @@ Just :: a -> Maybe a
 
 Maybe это к тому же Монада (будет понятно в следующей лекции)
 
-![Alt text](value_and_context.png)
-![Alt text](context.png)
+![Alt text](assets/value_and_context.png)
+![Alt text](assets/context.png)
 
 Его можно воспринимать как коробку в которой может что-то быть или нет
 
@@ -440,11 +440,11 @@ eitherSecond (_:x:_) = Right x
 data List a = Nil | Cons a (List a)
 ```
 
-* `List` - имя типа
-* `a` - параметр типа (что-то аля шаблонов в c++)
-* `Nil` - имя конструктора
-* `Cons` - имя конструктора
-* `a (List a)` - принять head и tail (элемент и остальной список)
+- `List` - имя типа
+- `a` - параметр типа (что-то аля шаблонов в c++)
+- `Nil` - имя конструктора
+- `Cons` - имя конструктора
+- `a (List a)` - принять head и tail (элемент и остальной список)
 
 ```haskell
 ghci> :t Nil
@@ -604,15 +604,15 @@ name :: ???
 
 Решения:
 
-* Не использовать одинаковые поля
+- Не использовать одинаковые поля
 
     ```haskell
     data Man = Man { manName :: String }
     data Cat = Cat { catName :: String }
     ```
 
-* Есть расширение, которое создает синтаксический сахар, и пытается из контекста понять какая используется
-  * Possible in GHC 8 with -XDuplicateRecordFields (not mature)
+- Есть расширение, которое создает синтаксический сахар, и пытается из контекста понять какая используется
+  - Possible in GHC 8 with -XDuplicateRecordFields (not mature)
 
     ```haskell
     {-# LANGUAGE DuplicateRecordFields #-}
@@ -1282,10 +1282,10 @@ import Data.Char as C
 
 ## Extra knowledge
 
-* [LearnYouAHaskell (chapters 3, 8)](https://learnyouahaskell.com/)
-* [HaskellWikiBook: More on datatypes Wiki](https://en.wikibooks.org/wiki/Haskell/More_on_datatypes)
-* [HaskellWikiBook: Classes and Types](https://en.wikibooks.org/wiki/Haskell/Classes_and_types)
-* [Philip Wadler «How to make ad-hoc polymorphism less ad hoc» 1988](http://people.csail.mit.edu/dnj/teaching/6898/papers/wadler88.pdf)
+- [LearnYouAHaskell (chapters 3, 8)](https://learnyouahaskell.com/)
+- [HaskellWikiBook: More on datatypes Wiki](https://en.wikibooks.org/wiki/Haskell/More_on_datatypes)
+- [HaskellWikiBook: Classes and Types](https://en.wikibooks.org/wiki/Haskell/Classes_and_types)
+- [Philip Wadler «How to make ad-hoc polymorphism less ad hoc» 1988](http://people.csail.mit.edu/dnj/teaching/6898/papers/wadler88.pdf)
 
 ---
 

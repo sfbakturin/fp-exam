@@ -109,7 +109,9 @@ Product types
 
 Над типами оперция произведения (по сути Tuple)
 
-> PT = T1 × T2 × … × Tn
+$$
+	PT = T_1 \times T_2 \times \ldots \times T_n
+$$
 
 C++
 
@@ -123,7 +125,9 @@ struct user {
 
 Типы можно воспринимать как множество: если мы сделаем пару из двух типов то у нас получается кол-во элементов которое населяют произведение типов это произведение множеств - берем любой элемент из первого множества, любой из второго и получается произведение.
 
-> user = int × string × string
+$$
+	user = \texttt{int} \times \texttt{string} \times \texttt{string}
+$$
 
 Haskell
 
@@ -137,7 +141,9 @@ Sum types
 
 Над типами оперция сложение
 
-> PT = T1 + T2 + … + Tn
+$$
+	PT = T_1 + T_2 + \ldots + T_n
+$$
 
 Сложно найти аналоги этого в не функциональных яп
 
@@ -149,9 +155,13 @@ ADT (Алгебраические типы) - это либо атомманрн
 
 Грамматика как могут выглядить типы
 
-> PrimitiveType::=Int∣Char∣Double∣...
->
-> ADT::=PrimitiveType∣ADT+ADT∣ADT×ADT
+$$
+	PrimitiveType = \texttt{Int} \bigg| \texttt{Char} \bigg| \texttt{Double} \bigg| \ldots
+$$
+
+$$
+	ADT = PrimitiveType \bigg| ADT + ADT \bigg| ADT \times ADT
+$$
 
 ---
 

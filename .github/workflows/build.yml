@@ -13,7 +13,7 @@ jobs:
       - name: dependencies
         run: |
           apt-get update
-          apt-get install texlive-xetex texlive-fonts-recommended pandoc -y
+          apt-get install texlive-xetex pandoc -y
       - name: setup
         uses: actions/checkout@v3
       - name: build

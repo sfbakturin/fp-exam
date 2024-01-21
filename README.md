@@ -13,4 +13,4 @@
 - [ ] Лекция №10: Template Haskell and Lens
 - [ ] Лекция №11: Brand new DSL world
 - [ ] Лекция №12: Some fun with kinds
-- [ ] [Лекция №13: Comonads](lectures/L13-Comonads.md)
+- [x] [Лекция №13: Comonads](lectures/L13-Comonads.md)

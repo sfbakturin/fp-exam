@@ -654,3 +654,482 @@ $$
 ```haskell
 data ListZipper a = LZ [a] a [a]
 ```
+
+#### Tree Zipper
+
+А теперь рассмотрим тип данных бинарного дерева.
+
+```haskell
+data Tree a = Leaf | Node (Tree a) a (Tree a)
+```
+
+Извлечем из него тип для подсчета зиппера.
+
+$$
+  \begin{aligned}
+    T(a) &\equiv T + a \cdot T(a)^2 \\
+    T'(a) &\equiv T(a)^2 + 2a \cdot T(a) \cdot T'(a) \\
+    &\equiv \dfrac{T(a)^2}{1 - 2a \cdot T(a)}
+  \end{aligned}
+$$
+
+Заметим, что $\dfrac{T(a)^2}{1 - 2a \cdot T(a)}$ - это нам знакомый список: $\dfrac{1}{1 - a}$ - тогда получаем,
+
+$$
+  \begin{aligned}
+    T'(a) &\equiv T(a)^2 \cdot L(2a \cdot T(a)) \\
+    Z_T(a) &\equiv T(a) \cdot a \cdot T(a) \cdot L(2a \cdot T(a))
+  \end{aligned}
+$$
+
+Мы получили довольно-таки странный тип зиппера.
+
+```haskell
+data ListEntry  a = LE Bool a (Tree a)
+data TreeZipper a = TZ (Tree a) a (Tree a) [ListEntry a]
+```
+
+Пока не очень понятно, в чем смысл данного типа. Давайте попробуем составить изоморфизм типов. Посмотрим внимательно на `ListEntry` и посчитаем его количество конструкторов: $2 \cdot a \cdot 3 \cdot a + a \cdot 3 \cdot a = 6 \cdot a^2 + 3 \cdot a^2 = 9 \cdot a^2$ - сумма типов - оно изоморфно следующему типу (назовем этот тип `Up`):
+
+```haskell
+data Up a = LeftBranch (Tree a) | RightBranch a (Tree a)
+-- зная, что `ListEntry a` изоморфен `Up a`, мы можем переписать `TreeZipper`
+data TreeZipper a = TZ (Tree a) a (Tree a) [Up a]
+```
+
+Итак. Давайте посмотрим на картинку.
+
+![Alt text](assets/tree.png)
+
+Итак. Сфокусируемся на *белой ноде*: слева у нас есть поддерево $3a$ и справа есть поддерево $3a$. Смысл зиппера в том, что мы можем восстановить всё, так как у нас имеются все данные: есть всё бинарное дерево. Снова посмотрим на белую ноду: чтобы заиметь всё дерево, нам нужно знать две вещи: нашего родителя и нашего потомка. Если мы *правое поддерево*, тогда наш родитель и потомок хранятся в *`LeftBranch`* (`Tree a` - потомок, `a` - родитель), в ином случае, если мы *левое поддерево* (посмотрим внимательно на красную ноду выше белой), то наш родитель и потомок хранятся в *`RightBranch`* - и всё это хранится в списке *`[Up a]`* - там лежат все предки, по которым мы прыгаем вверх. Если список `[Up a]` *пуст*, это значит, что у нас нету родителей - мы *корень*.
+
+Наконец, посмотрим на функции хождения по дереву.
+
+```haskell
+goRight :: TreeZipper a -> TreeZipper a
+goRight (TZ left x (Node l y r) bs) = TZ l y r (LeftBranch left x : bs)
+-- допустим, у нас есть кто-то справа, тогда,
+-- мы пойдем туда и для этой ноды мы запомним,
+-- что у него есть ПРЕДОК СЛЕВА от него и выше, то есть,
+-- то есть, он является ПРАВЫМ ПОДДЕРЕВОМ
+-- другие функции - `goLeft`, `goUp` - делаются также по аналогии
+```
+
+## Три комонады апокалипсиса и две не очень популярных
+
+Мы рассмотрим три основные, используемые вообще везде, комонады для работы над изменяемыми/неизменяемыми объектами, как бы эмулируя ООП-паттернов.
+
+### `Env`
+
+Начнём с тривиального примера. У нас есть `Pos1D`, представляющий из себя просто alias на парой.
+
+```haskell
+type Pos1D = (Int, Int)
+-- первый аргумент - это стартовая позиция
+-- второй аргумент - это текущая позиция
+```
+
+Создадим для него функции инициализации, хождения влево/вправо, и восстановления к стартовой позиции. Сразу обратим внимание, что создавать код, который бы эмулировал ООП (то есть, функции возвращают непосредственно значения, а не обновленное `Pos1D`) мы не будем, так как он не расширяемый.
+
+```haskell
+start :: Int -> Pos1D
+start n = (n, n)
+-- инициализация новой точки
+
+left :: Int -> Pos1D -> Pos1D
+left  n (z, x) = (z, x - n)
+-- ход влево
+
+right :: Int -> Pos1D -> Pos1D
+right n (z, x) = (z, x + n)
+-- ход вправо
+
+refresh :: Pos1D -> Pos1D
+refresh (z, _) = (z, z)
+-- восстановления к стартовой позиции
+```
+
+Пример работы.
+
+```haskell
+ghci> snd $ left 7 $ right 5 $ start 4
+2
+```
+
+Давайте ещё создадим именованную функции для `snd`.
+
+```haskell
+extract :: Pos1D -> Int
+extract (_, x) = x
+-- обратим внимание на название
+```
+
+Понятное дело, что `left` и `right` мы можем привести к знакомому `extend` виду и получить как будто новую монаду... Именно так и выглядит `Env` комонада - это просто пара из рабоче среды и значения.
+
+```haskell
+data Env e a = Env e a
+-- `e` - среда
+-- `a` - значение
+```
+
+Для него комонада достаточно тривиальная: `extract` будет возвращать непосредственно значение, а `extend` применять функцию на всю пару.
+
+```haskell
+instance Comonad (Env e) where
+  extract :: Env e a -> a
+  extract (Env _ a) = a
+
+  extend :: (Env e a -> b) -> Env e a -> Env e b
+  extend f env@(Env e _) = Env e (f env)
+```
+
+Тогда, перепишем `Pos1D` и некоторые функции как комонады.
+
+```haskell
+type Pos1D = Env Int Int
+-- теперь это точно комонада с функциями `extend` и `extract`
+```
+
+```haskell
+toStart :: Pos1D -> Int
+toStart (z, x) = if abs (z - x) >= 10 then z else x
+-- возвращаемся обратно, если ушли слишком далеко
+
+safeRight :: Int -> Pos1D -> Int
+safeRight n p = extract (p =>> right n =>> toStart)
+-- если вышли за границу, ты мы вернемся обратно
+```
+
+Примеры использования `Pos1D`.
+
+```haskell
+ghci> start 0 =>> safeRight 4
+(0, 4)
+
+ghci> start 0 =>> safeRight 4 =>> safeRight 5
+(0, 9)
+
+ghci> start 0 =>> safeRight 4 =>> safeRight 5 =>> safeRight 2
+(0, 0)
+
+ghci> start 0 =>> safeRight 4 =>> safeRight 5 =>> safeRight 2 =>> safeRight 3
+(0, 3)
+```
+
+### `Traced`
+
+Создадим билдер для флагов какой-то программы, назовём `Option` - это alias `String` и создадим тип данных `Config` - как список `Option`'ов. Сразу же обратимся к коду, который обновляет объект и возвращает его, если это нужно.
+
+```haskell
+type Option = String
+data Config = MakeConfig [Option] deriving (Show)
+```
+
+```haskell
+configBuilder :: [Option] -> Config
+configBuilder = MakeConfig
+-- принимаем список конфигураций и возвращаем как `Config`-объект
+
+defaultConfig :: [Option] -> Config
+defaultConfig options = MakeConfig (["-Wall"] ++ options)
+-- принимаем список конфигурация и добавляем туда "-Wall" флаг,
+-- возвращаем как `Config`-объект
+
+type ConfigBuilder = [Option] -> Config
+-- общий тип для функций построения `Config`'а
+
+profile :: ConfigBuilder -> Config
+profile builder = builder ["-prof", "-auto-all"]
+-- добавление в `Config` "-prof" и "-auto-all"
+
+goFaster :: ConfigBuilder -> Config
+goFaster builder = builder ["-O2"]
+-- добавление в `Config` "-O2"
+```
+
+Понятное дело, здесь мы не можем добавить `goFaster` и `profile` сразу же - приходится в два этапа это делать. Давайте доведем дело до комонады-вида: посмотрим на `extend` - его сигнатура это - `(ConfigBuilder -> Config) -> ConfigBuilder -> ConfigBuilder` - давайте раскроем эти типы, чтобы работать уже непосредственно с функциями как `ConfigBuilder`.
+
+```haskell
+extend :: (([Option] -> Config) -> Config)
+       ->  ([Option] -> Config)
+       ->  ([Option] -> Config)
+```
+
+В нашем случае мы получаем функцию следующего вида: у нас есть `setter` (первый аргумент, то, на что меняется аргументы) и `builder` (второй аргумент), принимаем как `opts1` - *добавляемые* опции и кидаем это всё в `setter` - там мы разворачиваем лямбду из `opts2` - это *старые* опции и подаём все это добро в `builder` - то, что построит нам новый `Config`.
+
+```haskell
+extend :: (([Option] -> Config) -> Config)
+       ->  ([Option] -> Config)
+       ->  ([Option] -> Config)
+extend setter builder = \opts1 -> setter (\opts2 -> builder (opts1 ++ opts2))
+-- `setter`  имеет тип `(([Option] -> Config) -> Config)`
+-- `builder` имеет тип `([Option] -> Config)`
+-- `opts1`   имеет тип `[Option]`
+-- `opts2`   имеет тип `[Option]`
+```
+
+Тогда, мы сможем реализовать `goFaster` и `profile` через `builder` и новые добавляемые опции.
+
+```haskell
+ghci> extract (defaultConfig =>> goFaster =>> profile)
+MakeConfig ["-Wall", "-prof", "-auto-all", "-O2"]
+```
+
+Наконец, представим миру комонаду `Traced` - это просто обёртка над функцией.
+
+```haskell
+newtype Traced m a = Traced { runTraced :: m -> a }
+```
+
+Заметим, что в `extend` мы использовали `++` - это моноидальная операция `<>` - возникает вопрос, правда ли, что мы должны оставлять в том же порядке применение этой операции, или мы должны поменять местами. Один из каноничных вариантов выглядит следующим образом - это подкласс моноида.
+
+```haskell
+instance Monoid m => Comonad (Traced m) where
+  extract :: Traced m a -> a
+  extract  (Traced ma) = ma mempty
+
+  extend :: (Traced m a -> b) -> Traced m a -> Traced m b
+  extend f (Traced ma) = Traced (\m -> f (Traced (\m' -> ma (m <> m'))))
+```
+
+Тогда, наш пример легко переписывается используя комонаду `Traced`.
+
+```haskell
+type ConfigBuilder = Traced [Option] Config
+
+profile :: ConfigBuilder -> Config
+profile builder = runTraced builder ["-prof", "-auto-all"]
+
+goFaster :: ConfigBuilder -> Config
+goFaster builder = runTraced builder ["-O2"]
+```
+
+```haskell
+ghci> extract (Traced defaultConfig =>> goFaster =>> profile)
+MakeConfig ["-Wall", "-prof", "-auto-all", "-O2"]
+```
+
+### `Store`
+
+Начнем, как и прежде, с небольшого примера: есть температура в Цельсиях и Кельвинах - хотим научиться работать с ними и между ними.
+
+```haskell
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+newtype Kelvin = Kelvin { getKelvin :: Double }
+  deriving (Num, Fractional)
+-- температура в Кельвинах
+
+newtype Celsius = Celsius { getCelsius :: Double }
+  deriving (Show)
+-- температура в Цельсиях
+
+type Thermostat a = (Kelvin, Kelvin -> a)
+-- термостат
+
+kelvinToCelsius :: Kelvin -> Celsius
+kelvinToCelsius (Kelvin t) = Celsius (t - 273.15)
+-- перевод из Кельвин в Цельсии
+
+initialThermostat :: Thermostat Celsius
+initialThermostat = (298.15, kelvinToCelsius)
+-- инициализация нового термостата
+```
+
+Сразу же поставим себе цель: мы хотим как-то уметь работать с значением в Кельвинах и иметь `extract`, который бы применял на значении поданную функцию. Зададим ещё несколько функций для работы с температурами: `up`, `down` и `toString` - не будем рассматривать плохой случай, поэтому перейдем сразу к правильному решению. Посмотрим на сигнатуру `extend`.
+
+```haskell
+extend :: ((Kelvin, Kelvin -> a) -> b)
+       ->  (Kelvin, Kelvin -> a)
+       ->  (Kelvin, Kelvin -> b)
+```
+
+Назовем первым аргументом `preview` - это функция `(Kelvin, Kelvin -> a) -> b` (основная функция изменения), следующим будет элемент пары - `t :: Kelvin`, и ещё один элемент - `f :: Kelvin -> a`. Тогда, мы оставляем `t` - как есть (первый элемент возвращаемой пары) и подаем в качестве функции `preview` на уже, внимание, *измененное значение* `t` и функции `f` - имеется ввиду, что при `extract`'е мы применим нашу функциональную часть на аргументе в виде *начального значениям* (первый аргумент пары).
+
+```haskell
+extend :: ((Kelvin, Kelvin -> a) -> b)
+       ->  (Kelvin, Kelvin -> a)
+       ->  (Kelvin, Kelvin -> b)
+extend preview (t, f) = (t, \t' -> preview (t', f))
+```
+
+Приведем к общему случаю, который обычно именуют как `Store`-комонада. Внезапно, он напоминает `Traced` - тоже функция, но со своей идеей.
+
+```haskell
+data Store s a = Store (s -> a) s
+-- значение типа `s` - это хранимое значение
+-- значение типа `a` - это accessor/selector
+```
+
+Тогда, `extract` - это применение положенной функции на хранимое значение, а `extend` - это "расширение" положенной функции на ещё одну функцию.
+
+```haskell
+instance Comonad (Store s) where
+  extract :: Store s a -> a
+  extract  (Store f s) = f s
+
+  extend :: (Store s a -> b) -> Store s a -> Store s b
+  extend f (Store g s) = Store (f . Store g) s 
+```
+
+Перепишем пример на комонаду.
+
+```haskell
+type Thermostat a = Store Kelvin a
+```
+
+```haskell
+initialThermostat :: Thermostat Celsius
+initialThermostat = store kelvinToCelsius 298.15
+
+thermostat :: Kelvin -> Thermostat Kelvin
+thermostat = store id
+-- default функция - ничего не делаем, возвращаем саму себя
+```
+
+```haskell
+seeks :: (s -> s) -> Store s a -> Store s a
+seeks f (Store g s) = Store g (f s)
+-- если уж очень захотим поменять положенное значение
+```
+
+```haskell
+up, square :: Thermostat a -> a
+up     = extract . seeks (+1)
+square = extract . seeks (^2)
+
+toString :: Thermostat Kelvin -> String
+toString t = show (getKelvin $ extract t) ++ " K"
+```
+
+```haskell
+(=<=) :: Comonad w => (w b -> c) -> (w a -> b) -> w a -> c
+f =<= g = f . extend g
+-- стандартная композиция комонад (см. самое начало)
+```
+
+Пример использования.
+
+```haskell
+ghci> putStrLn $ toString =<= up $ thermostat 3
+4.0°K
+
+ghci> putStrLn $ toString =<= square =<= up $ thermostat 3
+16.0°K
+```
+
+### `Stream`
+
+Создадим некий аналог итератора - только он будет бесконечным. Полезно, например, для создания бесконечной истории в терминале. Зададим несколько функций.
+
+```haskell
+data Iterator a = a :< Iterator a
+infixr 5 :<
+```
+
+```haskell
+initialHistory :: Iterator String
+initialHistory = "" :< initialHistory
+```
+
+```haskell
+exampleHistory :: Iterator String
+exampleHistory =
+       "^D"
+    :< "^C"
+    :< "eat flaming death"
+    :< "hello?"
+    :< "bye"
+    :< "exit"
+    :< "quit"
+    :< "?"
+    :< "help"
+    :< "ed"
+    :< initialHistory
+```
+
+```haskell
+extract :: Iterator a -> a
+extract (cmd :< _) = cmd
+-- сразу, без тех или иных ожиданий, определим `extract` - вытащить текущий
+-- элемент - на тот, на который мы сейчас смотрим
+```
+
+А теперь определимся сразу с `extend` (проблема с итераторами в том, что у нас слишком сложные функции для получения следующего элемента). Что должен делать `extend`? По факту, ему нужно применить функцию на *голове* стрима и *хвосту* (через тот же `extend`).
+
+```haskell
+extend :: (Iterator a -> b)
+       ->  Iterator a
+       ->  Iterator b
+extend it@(_ :< xs) = f it :< extend f xs
+```
+
+Есть небольшая проблема. `extend` очень похож по поведению на `fmap`, но вместо того, чтобы вызывать функцию `f`, имея доступ к *одному* элементу, оно (по сигнатуре) имеет доступ ко всем элементам, что даёт небывалый доступ к контексту.
+
+```haskell
+data Iterator a = a :< (Iterator a)
+data Stream a = Cons a (Stream a)
+```
+
+### `NonEmpty`
+
+Последняя из полезных комонад - это `NonEmpty`. Это список, в котором всегда есть хотя бы один элемент - по сути, внутри него лежит ещё и пустой список.
+
+```haskell
+data NonEmpty a = a :| [a]
+```
+
+Для него `extract` - это достать своеобразную голову, а `extend` - это пропихнуть функцию и изменить все элементы.
+
+```haskell
+instance Comonad NonEmpty where
+  extend f w@ ~(_ :| aas) = f w :| case aas of
+      []     -> []
+      (a:as) -> toList (extend f (a :| as))
+
+  extract ~(a :| _) = a
+```
+
+Примеры использования.
+
+```haskell
+ghci> extract (3 :| [5..10] =>> take 3)
+[3, 5, 6]
+
+ghci> extract (3 :| [5..10] =>> take 3 =>> take 4)
+[[3, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
+```
+
+## `codo`-нотация
+
+`codo` нотация - это аналог `do` нотаций, только для комонад, по сути является синтаксическим сахаром.
+
+```haskell
+-- оригинальный код
+method
+  wa> expr1
+  wb> expr2
+  wc> expr3
+
+-- трансформируется в...
+  \wa ->
+  let wb = extend (\this -> expr1) wa
+      wc = extend (\this -> expr2) wb
+  in extract (extend (\this -> expr3) wc)
+```
+
+Немного другой пример.
+
+```haskell
+-- оригинальный код
+method
+  expr1
+  expr2
+  expr3
+
+-- трансформируется в...
+  \_wa ->
+  let _wb = extend (\this -> expr1) _wa
+      _wc = extend (\this -> expr2) _wb
+  in extract (extend (\this -> expr3) _wc)
+```

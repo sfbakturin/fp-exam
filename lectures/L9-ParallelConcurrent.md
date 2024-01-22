@@ -263,6 +263,19 @@ Caught arith exception: divide by zero
 Caught my async exception
 ```
 
+> Как поймать любой Exception?
+>
+> У нас есть такой data type,
+который называется someException. Это коробочка, которая умеет содержать внутри себя любое произвольное исключение. И у нас в type классе exception существуют функции fromException и toException. И с помощью функции fromException можно привести someException, то есть какое-то произвольное исключение, мы пока не знаем, какое. То есть какое-то наше исключение,которое лежит в коробочке. Мы с помощью функции fromException можем попытаться скастить это произвольное исключение к нашему. Можно с помощью функции fromException попытаться привести someException к myException. Функция fromException разрешает maybe. То есть либо нам удалось распаковать someException, и там лежит то, что нам нужно, либо там лежит что-то другое. В данном случае нам вернется nothing.
+>
+> Таким образом, если мы хотим в нашей функции поймать произвольное исключение, но каким-либо конкретным образом обработать, допустим, fileNotFound и divideByZero, условно говоря, мы ловим someException, пытаемся достать из него arithException, то есть divideByZero. Если нам удалось, мы каким-либо образом в специфичном обрабатываем. Затем, если нам не удалось, мы пытаемся достать оттуда io-шный Exception про fileNotFound. Если нам удалось, мы каким-либо образом чистим ресурсы или делаем что-то еще. И в каком-то общем кейсе, если там лежит что-то, что нам неизвестно, какое-то произвольное исключение другое, которое нам не удалось достать, мы каким-то последним случаем это обрабатываем.
+>
+> В чем фундаментальная проблема?
+>
+> В том, что тип нашего хендлера, вот этот аргумент, он называется хендлер. То есть это обработчик с исключением. Он должен иметь какой-то конкретный тип. Мы здесь можем ловить только какой-то конкретный exception. Допустим, myException или ourException. Мы не можем тут поймать какой-то е, который exception. И вот для того, чтобы уметь поймать что-то произвольное, придумали такую вещь, как самException. В него runtimeHaskell умеет запаковывать исключение, которое мы бросили. Которое мы потом на стороне ловли можем распаковать.
+>
+> На самом деле довольно важный аспект. Если кто не помнит, я советую пересмотреть это дело, пересмотреть слайды в лекции про IO. Мы там довольно подробно на этом остановились. Сейчас это было просто в качестве напоминания.
+
 ---
 
 ## Masquerade
@@ -273,9 +286,11 @@ main = action `catch` \e -> do
          cleanup
 ```
 
-If asynchronous exception may pop up in any context
+Если асинхронное исключение может появиться в любом контексте.
 
-Can it appear inside of catch handler?
+Может ли оно появиться внутри обработчика catch?
+
+> Да может, и это проблема, потому что получится бесконечная лесенка из вложенных catch в каждом из которых может произойти исключение
 
 ```haskell
 main = action `catch` \e -> do
@@ -289,15 +304,19 @@ Still not good :(
 mask_ :: IO a -> IO a
 ```
 
-Executes an IO computation with asynchronous exceptions masked.
+Выполняет вычисления IO с маскировкой асинхронных исключений.
 
-I.e. any thread which attempts to raise an exception in the current thread with throwTo will be blocked until asynchronous exceptions are unmasked again.
+Т.е. любой поток, который попытается поднять исключение в текущем потоке с помощью [throwTo](https://hackage.haskell.org/package/base-4.12.0.0/docs/Control-Exception.html#v:throwTo), будет заблокирован до тех пор, пока асинхронные исключения не будут снова сняты.
+
+> Вообще надо было обернуть весь `do` блок в `mask_` тк пока выполняется `printError` может прилететь исключение
 
 ```haskell
 main = action `catch` \e -> do
          printError e
          (mask_ cleanup)
 ```
+
+> К сожалению, функция mask – это довольно опасная штука, если же во время действия этого, которое мы оборачиваем с помощью функции mask, наша программа внезапно зацикливается, то с ней ничего нельзя делать, кроме как кинуть ей SIGKILL.
 
 ---
 
@@ -306,13 +325,13 @@ main = action `catch` \e -> do
 ![Alt text](assets/6rkg826s.bmp)
 ![Alt text](assets/y1dpxqgz.bmp)
 
-Some advice on exception handling
+Несколько советов по обработке исключений
 
-- Properly using mask is very hard, use *bracket*
-- Restoring from async exceptions is dangerous
-  - Make the clean-up and exit
-- Async and sync exceptions are indistinguishable
-  - Consider using package *safe-exceptions*
+- Правильно использовать маску очень сложно, используйте *bracket*.
+- Восстановление из асинхронных исключений опасно
+  - Выполните очистку и выйдите из системы
+- Асинхронные и синхронные исключения неотличимы друг от друга
+  - Рассмотрите возможность использования пакета *safe-exceptions* (AsyncException).
 
 [Must-read blog post on Exception handling!](https://www.fpcomplete.com/blog/2018/04/async-exception-handling-haskell)
 
@@ -320,7 +339,7 @@ Some advice on exception handling
 
 ## Never use forkIO
 
-Let's launch two IO computations in parallel
+Давайте запустим два параллельных вычисления IO
 
 ```haskell
 asyncExec :: IO a -> IO (MVar a)
@@ -366,6 +385,8 @@ MyException
 *** Exception: thread blocked indefinitely in an MVar operation
 ```
 
+> Если в начальном потоке что-то бросим, то основное, похоже, никогда не дождется. Да, все верно. Потому что представьте, что во время нашего экшена, допустим, мы бросим myException во втором потоке. Таким образом, мы в нашей функции asyncExec, когда запустим действие forClose, наш поток, в котором исполняется вот это действие, просто умрет, и мы никогда не дождемся того, что putMvar отработает. Таким образом, мы вернем пустой mvar. То есть функция asyncExec вернет пустой mvar для второго действия. Соответственно, данный mvar будет пустой, и мы бесконечно заблочимся.
+
 ---
 
 ```haskell
@@ -389,7 +410,7 @@ main = do
 concurrently :: IO a -> IO b -> IO (a, b)
 ```
 
-Oops...
+Всё нормально:
 
 ```haskell
 *** Exception: MyException
@@ -405,6 +426,9 @@ Oops...
 concurrently :: IO a -> IO b -> IO (a, b)
 race         :: IO a -> IO b -> IO (Either a b)
 ```
+
+`concurrently` запускает параллельно, возвращает пару
+`race` запускает параллельн, возвращает первое которое завершилось
 
 ```haskell
 worker :: Int -> IO Int  -- simulate some work
@@ -429,9 +453,13 @@ test3 :: IO [Int]
 test3 = mapConcurrently worker [0..10000]
 ```
 
+`mapConcurrently` запускает список действий, использует грин треды, можно запускать сотнями и тысячими, но лучше не плодить
+
 ---
 
 ## Concurrently newtype
+
+Concurrently – это просто обертка над иошным действием, который может быть скомпозирован с другими экземплярами типа concurrently, с использованием инстансов этой класса, аппликатив и альтернатив.
 
 ```haskell
 -- Concurrently newtype is just an IO action that can be composed
@@ -446,12 +474,16 @@ test1 = runConcurrently $ (,)
   <*> Concurrently (worker 2000)
 ```
 
+test1 - это просто `concurrently (worker 1000) (worker 2000)`
+
 ```haskell
 test2 :: IO (Either Int Int)
 test2 = runConcurrently
     $ (Left  <$> (Concurrently $ worker 1000))
   <|> (Right <$> (Concurrently $ worker 2000))
 ```
+
+test2 - это просто `race(worker 1000) (worker 2000)`
 
 > It's easy to build complex computation using Concurrently newtype
 
@@ -464,6 +496,8 @@ test2 = runConcurrently
 -- will give a result of type 'a'.
 data Async a
 ```
+
+Если нужно внимательно следить за состоянием асинхронном вычисления запущенном в отдельном потоке
 
 ```haskell
 withAsync :: IO a -> (Async a -> IO b) -> IO b
@@ -498,6 +532,8 @@ transfer amount from to = do
 ```
 
 > You all know this is bad :)
+>
+> Плохо, что IORef не потокобезопасный
 
 ---
 
@@ -523,6 +559,8 @@ transfer amount from to = do
 ```
 
 > Problems?
+>
+> Плохо, может быть deadlock если одновременно сделать a -> b и b -> a. Или мы можем выполнить какую-то операцию между debit/credit нашей текущей.
 
 ---
 
@@ -547,9 +585,13 @@ transfer amount from to = do
     credit amount to
 ```
 
+> STM выполянется атомарно, если за время выполнения изменятся данные - вычисление будет запущенно заново. При exception быдет rollback (запущенно заново).
+
 ---
 
 ## STM
+
+> STM это код без блокировок
 
 ```haskell
 -- import Control.Concurrent.STM
@@ -593,36 +635,40 @@ takeEitherTMVar ma mb =
     fmap Right (takeTMVar mb)
 ```
 
+`TMVar` - можно лочить и использовать в монаде STM
+
 STM (TVar) is composable and more flexible but MVar is faster.
 
 If you want concurrent Map or Set: <http://hackage.haskell.org/package/stm-containers>
 
 ---
 
-## Immutability advantages
+## Преимущества неизменности
 
-1. Easier to debug
-2. Easier to write thread-safe code
-3. Harder to shoot yourself in the foot or even blow up your head
+1. Легче отлаживать
+2. Легче писать потокобезопасный код
+3. Трудно прострелить себе ногу или даже взорвать голову
 
-Can't modify\
-⇒ No writes\
-⇒ No data races\
-⇒ No locks
+Не могу модифицировать\
+⇒ Нет записей\
+⇒ Никаких гонок данных\
+⇒ Нет блокировок
 
 ---
 
-## Purity advantages
+## Преимущества чистоты
 
-1. No side-effects
-2. Arbitrary order of evaluation
-3. Again, easier to write thread-safe code
+1. Отсутствие побочных эффектов
+2. Произвольный порядок оценки
+3. Опять же, проще писать потокобезопасный код
 
 ---
 
 ## Parallel primitives
 
 How to execute pure computations in parallel?
+
+> Eval специальная монада для исполнения параллельных вычислений
 
 ```haskell
 data Eval a                  -- Eval is monad for parallel computation
@@ -633,6 +679,9 @@ runEval :: Eval a -> a  -- pull the result out of the monad
 rpar :: a -> Eval a  -- suggest to parallel, create *spark* 
 rseq :: a -> Eval a  -- wait for evaluation of argument (eval it to WHNF)
 ```
+
+- `rpar` вычисли значение до слабой головной нормальной формы параллельно
+- `rseq` вычисли значение до слабой головной нормальной формы последовательно
 
 > **Spark** — amount of job that could be done\
 > **Spark** — hint to compiler: «Do it in parallel»
@@ -836,6 +885,10 @@ main = print $ parFib 41
 4. Distributed programming ([CloudHaskell](https://hackage.haskell.org/package/distributed-process))
 5. GHC scheduler (round-robin)
 6. Tuning and debugging
+
+---
+
+## Дополнительно, сверх лекции
 
 ---
 

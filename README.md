@@ -12,6 +12,6 @@
 - [x] [Лекция №8: Speeding up Haskell](lectures/L8-SpeedingUpHaskell.md)
 - [x] [Лекция №9: Parallel and Concurrent Haskell](lectures/L9-ParallelConcurrent.md)
 - [x] [Лекция №10: Template Haskell and Lens](https://drive.google.com/file/d/13s_01zwlel2oHnwPe0sb4cjqjuAuDfun/view?usp=sharing)
-- [ ] [Лекция №11: Brand new DSL world](lectures/L11-BrandNewDSLWorld.md)
+- [x] [Лекция №11: Brand new DSL world](lectures/L11-BrandNewDSLWorld.md)
 - [x] [Лекция №12: Some fun with kinds](lectures/L12-Kinds.md)
 - [x] [Лекция №13: Comonads](lectures/L13-Comonads.md)

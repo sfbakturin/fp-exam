@@ -6,6 +6,7 @@
 - [x] [Лекция №3: Datas, Classes, Instances](lectures/L3-DatasClassesInstances.md)
 - [x] [Лекция №4: Basic typeclasses: Monoid. Functor. Applicative](lectures/L4-MonoidFunctorApplicative.md)
 - [x] [Лекция №5: Monads](lectures/L5-Monads.md)
+- [x] [Лекция №5.5: Parsers Combinator](lectures/L5-Parsers.md)
 - [x] [Лекция №6: RealWorld](lectures/L6-RealWorld.md)
 - [x] [Лекция №7: Monad Transformers](lectures/L7-MonadTransformers.md)
 - [x] [Лекция №8: Speeding up Haskell](lectures/L8-SpeedingUpHaskell.md)

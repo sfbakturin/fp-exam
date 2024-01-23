@@ -12,5 +12,5 @@
 - [x] [Лекция №9: Parallel and Concurrent Haskell](lectures/L9-ParallelConcurrent.md)
 - [ ] Лекция №10: Template Haskell and Lens
 - [ ] Лекция №11: Brand new DSL world
-- [ ] Лекция №12: Some fun with kinds
+- [x] [Лекция №12: Some fun with kinds](lectures/L12-Kinds.md)
 - [x] [Лекция №13: Comonads](lectures/L13-Comonads.md)

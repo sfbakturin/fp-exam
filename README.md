@@ -9,7 +9,7 @@
 - [x] [Лекция №6: RealWorld](lectures/L6-RealWorld.md)
 - [x] [Лекция №7: Monad Transformers](lectures/L7-MonadTransformers.md)
 - [x] [Лекция №8: Speeding up Haskell](lectures/L8-SpeedingUpHaskell.md)
-- [ ] Лекция №9: Parallel and Concurrent Haskell
+- [x] [Лекция №9: Parallel and Concurrent Haskell](lectures/L9-ParallelConcurrent.md)
 - [ ] Лекция №10: Template Haskell and Lens
 - [ ] Лекция №11: Brand new DSL world
 - [ ] Лекция №12: Some fun with kinds

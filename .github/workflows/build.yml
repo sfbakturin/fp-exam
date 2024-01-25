@@ -17,11 +17,24 @@ jobs:
       - name: setup
         uses: actions/checkout@v3
       - name: build
-        run: bash build.sh
-      - name: publish
-        uses: actions/upload-artifact@v3
+        run: |
+          bash build.sh
+          cd sources && zip -9 fp-exam.zip *.pdf && zip --test fp-exam.zip
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
         with:
-          name: lectures
-          path: ./lectures/*.pdf
-          retention-days: 7
-          if-no-files-found: error
+          draft: false
+          prerelease: false
+          tag_name: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: publish
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./sources/fp-exam.zip
+          asset_name: fp-exam.zip
+          asset_content_type: application/pdf

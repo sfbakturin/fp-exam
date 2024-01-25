@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd lectures || exit
+cd sources || exit 1
 
 for INPUT in *.md; do
 	OUTPUT="${INPUT%.*}.pdf"
@@ -9,6 +9,6 @@ for INPUT in *.md; do
 		-V "mainfont:DejaVu Sans" \
 		-V "monofont:DejaVu Sans Mono" \
 		-V geometry:margin=1in \
-		-o "${OUTPUT}"
+		-o "${OUTPUT}" || exit 2
 	echo "${OUTPUT}"
 done

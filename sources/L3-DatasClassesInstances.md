@@ -395,8 +395,8 @@ Just :: a -> Maybe a
 
 Maybe это к тому же Монада (будет понятно в следующей лекции)
 
-![Alt text](../assets/value_and_context.png)
-![Alt text](../assets/context.png)
+![Alt text](assets/value_and_context.png)
+![Alt text](assets/context.png)
 
 Его можно воспринимать как коробку в которой может что-то быть или нет
 

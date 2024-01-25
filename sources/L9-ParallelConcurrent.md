@@ -18,7 +18,7 @@ Lecture plan:
 
 Сравнение количество папяти которое потребляет Haskell трэд:
 
-![Alt text](../assets/fng5x0zf.bmp)
+![Alt text](assets/fng5x0zf.bmp)
 
 [Nice presentation](http://bob.ippoli.to/haskell-for-erlangers-2014/#/title)
 
@@ -30,7 +30,7 @@ Lecture plan:
 
 И самая мелкая, самая гранулярная единица – это так называемые спарки. О спарках мы будем говорить, когда будем говорить о параллелизме. Спарк представляет собой маленькую задачку из fork-drawing-pool Haskell, которую мы хотим запустить в отдельном потоке.
 
-![Alt text](../assets/7d59ryn1.png)
+![Alt text](assets/7d59ryn1.png)
 
 > То есть если трэдов в Haskell можно наспавнить достаточно много, потому что они не обязательно один в один мапятся к OS-трэдам, потому что они достаточно легковесные, то спарки – это куда более и более мелкая единица, которой вообще можно тысячами плодить и никаким образом от этого не страдать.
 
@@ -76,7 +76,7 @@ Main thread finishes
 
 ---
 
-![Alt text](../assets/3c6lp6g7.bmp)
+![Alt text](assets/3c6lp6g7.bmp)
 
 ---
 
@@ -322,8 +322,8 @@ main = action `catch` \e -> do
 
 ## Bracket is your friend
 
-![Alt text](../assets/6rkg826s.bmp)
-![Alt text](../assets/y1dpxqgz.bmp)
+![Alt text](assets/6rkg826s.bmp)
+![Alt text](assets/y1dpxqgz.bmp)
 
 Несколько советов по обработке исключений
 
@@ -697,7 +697,7 @@ runEval $ do
     return (a, b)
 ```
 
-![Alt text](../assets/a12kuctm.bmp)
+![Alt text](assets/a12kuctm.bmp)
 
 ---
 
@@ -710,7 +710,7 @@ runEval $ do
     return (a, b)
 ```
 
-![Alt text](../assets/jwnyaij6.bmp)
+![Alt text](assets/jwnyaij6.bmp)
 
 ---
 
@@ -724,7 +724,7 @@ runEval $ do
     return (a, b)
 ```
 
-![Alt text](../assets/2zzxowa8.bmp)
+![Alt text](assets/2zzxowa8.bmp)
 
 ---
 
@@ -768,7 +768,7 @@ bash:
 threadscope TestFib.eventlog
 ```
 
-![Alt text](../assets/datqn3fu.bmp)
+![Alt text](assets/datqn3fu.bmp)
 
 ---
 
@@ -782,7 +782,7 @@ parEvalFibPair = runEval $ do
     return (a, b)
 ```
 
-![Alt text](../assets/no24z9j9.bmp)
+![Alt text](assets/no24z9j9.bmp)
 
 ---
 
@@ -804,7 +804,7 @@ ghc -O2 -threaded -rtsopts -eventlog TestFib.hs
 
 ## threadscope (3/3)
 
-![Alt text](../assets/303yv1mc.bmp)
+![Alt text](assets/303yv1mc.bmp)
 
 ---
 
@@ -873,7 +873,7 @@ main = print $ parFib 41
 
 ## Innacurate parallelism (2/2)
 
-![Alt text](../assets/kesetngd.bmp)
+![Alt text](assets/kesetngd.bmp)
 
 ---
 
@@ -913,7 +913,7 @@ main = print $ parFib 41
 
 ---
 
-![Alt text](../assets/os0d7uif.bmp)
+![Alt text](assets/os0d7uif.bmp)
 
 ---
 
@@ -1057,7 +1057,7 @@ parList strat xs = do
 
 > **All the parallelism it creates will be discarded by the garbage collector**
 
-![Alt text](../assets/fltwb2rm.bmp)
+![Alt text](assets/fltwb2rm.bmp)
 
 ---
 
@@ -1093,7 +1093,7 @@ parMTwoFibs n m = runPar $ do
     return (a + b)
 ```
 
-![Alt text](../assets/fpsk0ekj.bmp)
+![Alt text](assets/fpsk0ekj.bmp)
 
 ---
 
@@ -1123,7 +1123,7 @@ example1 x = runPar $ do
     return (d', e')
 ```
 
-![Alt text](../assets/f6wmmekp.bmp)
+![Alt text](assets/f6wmmekp.bmp)
 
 ---
 

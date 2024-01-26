@@ -1,5 +1,50 @@
 # Parallel and Concurrent Haskell
 
+- [Parallel and Concurrent Haskell](#parallel-and-concurrent-haskell)
+  - [Lecture plan](#lecture-plan)
+  - [Fork a thread](#fork-a-thread)
+  - [Where is my join?](#where-is-my-join)
+  - [More about MVar](#more-about-mvar)
+  - [What to do thread id?](#what-to-do-thread-id)
+  - [Exceptions classification](#exceptions-classification)
+  - [Handle exception](#handle-exception)
+  - [Masquerade](#masquerade)
+  - [Bracket is your friend](#bracket-is-your-friend)
+  - [Never use forkIO](#never-use-forkio)
+  - [Async package - Basic primitives](#async-package---basic-primitives)
+  - [Concurrently newtype](#concurrently-newtype)
+  - [Async package - Advanced usage](#async-package---advanced-usage)
+  - [Transactions (1/3)](#transactions-13)
+  - [Transactions (2/3)](#transactions-23)
+  - [Transactions (3/3)](#transactions-33)
+  - [STM](#stm)
+  - [STM examples](#stm-examples)
+  - [Преимущества неизменности](#преимущества-неизменности)
+  - [Преимущества чистоты](#преимущества-чистоты)
+  - [Parallel primitives](#parallel-primitives)
+  - [Difference between rpar and rseq (1/3)](#difference-between-rpar-and-rseq-13)
+  - [Difference between rpar and rseq (2/3)](#difference-between-rpar-and-rseq-23)
+  - [Difference between rpar and rseq (3/3)](#difference-between-rpar-and-rseq-33)
+  - [Classic example: fib](#classic-example-fib)
+  - [threadscope (1/3)](#threadscope-13)
+  - [threadscope (2/3)](#threadscope-23)
+  - [More ghc options](#more-ghc-options)
+  - [threadscope (3/3)](#threadscope-33)
+  - [What about sparks?](#what-about-sparks)
+  - [Innacurate parallelism (1/2)](#innacurate-parallelism-12)
+  - [Innacurate parallelism (2/2)](#innacurate-parallelism-22)
+  - [What else?](#what-else)
+  - [Дополнительно, сверх лекции](#дополнительно-сверх-лекции)
+    - [Read all concurrently](#read-all-concurrently)
+    - [Strategies](#strategies)
+    - [Combine strategies](#combine-strategies)
+    - [parList and GC'd sparks (1/2)](#parlist-and-gcd-sparks-12)
+    - [parList and GC'd sparks (2/2)](#parlist-and-gcd-sparks-22)
+    - [Par Monad](#par-monad)
+    - [Par examples (1/3)](#par-examples-13)
+    - [Par maps](#par-maps)
+    - [Par examples (2, 3 / 3)](#par-examples-2-3--3)
+
 ## Lecture plan
 
 На сегодняшней лекции мы поговорим, как писать многопоточный код на Haskell, какие есть примитивы для синхронизации потоков, какие есть библиотеки для работы с этим, потому что работа с низкоуровневыми примитивами имеет свои проблемы.
@@ -892,7 +937,7 @@ main = print $ parFib 41
 
 ---
 
-## Read all concurrently
+### Read all concurrently
 
 - [Real World Haskell (chapter 24): Concurrent and multicore progr.](http://book.realworldhaskell.org/read/concurrent-and-multicore-programming.html)
 - [A tutorial on concurrent and parallel programming on haskell](http://research.microsoft.com/en-us/um/people/simonpj/papers/parallel/afp08-notes.pdf)
@@ -917,7 +962,7 @@ main = print $ parFib 41
 
 ---
 
-## Strategies
+### Strategies
 
 ```haskell
 rpar :: a -> Eval a
@@ -964,7 +1009,7 @@ withStrategy :: Strategy a -> a -> a  -- flipped `using`
 
 ---
 
-## Combine strategies
+### Combine strategies
 
 ```haskell
 dot :: Strategy a -> Strategy a -> Strategy a
@@ -1021,7 +1066,7 @@ parMap strat f = withStrategy (parList strat) . map f
 
 ---
 
-## parList and GC'd sparks (1/2)
+### parList and GC'd sparks (1/2)
 
 ```haskell
 evalList :: Strategy a -> Strategy [a]
@@ -1053,7 +1098,7 @@ parList strat xs = do
 
 ---
 
-## parList and GC'd sparks (2/2)
+### parList and GC'd sparks (2/2)
 
 > **All the parallelism it creates will be discarded by the garbage collector**
 
@@ -1061,7 +1106,7 @@ parList strat xs = do
 
 ---
 
-## Par Monad
+### Par Monad
 
 ```haskell
 newtype Par a
@@ -1097,7 +1142,7 @@ parMTwoFibs n m = runPar $ do
 
 ---
 
-## Par examples (1/3)
+### Par examples (1/3)
 
 ```haskell
 import Control.Monad (replicateM)
@@ -1127,7 +1172,7 @@ example1 x = runPar $ do
 
 ---
 
-## Par maps
+### Par maps
 
 ```haskell
 spawn :: NFData a => Par a -> Par (IVar a)
@@ -1150,7 +1195,7 @@ parMapM f xs = do
 parMap :: NFData b => (a -> b) -> [a] -> Par [b]
 ```
 
-## Par examples (2, 3 / 3)
+### Par examples (2, 3 / 3)
 
 ```haskell
 example2 :: [Int]
@@ -1166,3 +1211,52 @@ example3 n = runPar $ do
     let reducer x y = return (x+y)
     parMapReduceRangeThresh 10 range mapper reducer 0
 ```
+
+---
+
+- [Parallel and Concurrent Haskell](#parallel-and-concurrent-haskell)
+  - [Lecture plan](#lecture-plan)
+  - [Fork a thread](#fork-a-thread)
+  - [Where is my join?](#where-is-my-join)
+  - [More about MVar](#more-about-mvar)
+  - [What to do thread id?](#what-to-do-thread-id)
+  - [Exceptions classification](#exceptions-classification)
+  - [Handle exception](#handle-exception)
+  - [Masquerade](#masquerade)
+  - [Bracket is your friend](#bracket-is-your-friend)
+  - [Never use forkIO](#never-use-forkio)
+  - [Async package - Basic primitives](#async-package---basic-primitives)
+  - [Concurrently newtype](#concurrently-newtype)
+  - [Async package - Advanced usage](#async-package---advanced-usage)
+  - [Transactions (1/3)](#transactions-13)
+  - [Transactions (2/3)](#transactions-23)
+  - [Transactions (3/3)](#transactions-33)
+  - [STM](#stm)
+  - [STM examples](#stm-examples)
+  - [Преимущества неизменности](#преимущества-неизменности)
+  - [Преимущества чистоты](#преимущества-чистоты)
+  - [Parallel primitives](#parallel-primitives)
+  - [Difference between rpar and rseq (1/3)](#difference-between-rpar-and-rseq-13)
+  - [Difference between rpar and rseq (2/3)](#difference-between-rpar-and-rseq-23)
+  - [Difference between rpar and rseq (3/3)](#difference-between-rpar-and-rseq-33)
+  - [Classic example: fib](#classic-example-fib)
+  - [threadscope (1/3)](#threadscope-13)
+  - [threadscope (2/3)](#threadscope-23)
+  - [More ghc options](#more-ghc-options)
+  - [threadscope (3/3)](#threadscope-33)
+  - [What about sparks?](#what-about-sparks)
+  - [Innacurate parallelism (1/2)](#innacurate-parallelism-12)
+  - [Innacurate parallelism (2/2)](#innacurate-parallelism-22)
+  - [What else?](#what-else)
+  - [Дополнительно, сверх лекции](#дополнительно-сверх-лекции)
+    - [Read all concurrently](#read-all-concurrently)
+    - [Strategies](#strategies)
+    - [Combine strategies](#combine-strategies)
+    - [parList and GC'd sparks (1/2)](#parlist-and-gcd-sparks-12)
+    - [parList and GC'd sparks (2/2)](#parlist-and-gcd-sparks-22)
+    - [Par Monad](#par-monad)
+    - [Par examples (1/3)](#par-examples-13)
+    - [Par maps](#par-maps)
+    - [Par examples (2, 3 / 3)](#par-examples-2-3--3)
+
+---

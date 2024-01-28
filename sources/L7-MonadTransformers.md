@@ -65,7 +65,8 @@
 6. Наконец, единственное и правильно решение - использовать *трансформеры*-монады.
 
     ```haskell
-    foo :: Int -> ReaderT Int (State [Int]) Int -- альтернатива: `StateT [Int] (Reader Int) Int`
+    foo :: Int -> ReaderT Int (State [Int]) Int -- альтернатива:
+                                                -- `StateT [Int] (Reader Int) Int`
     foo i = do
       baseCounter <- ask
       let newCounter = baseCounter + i
@@ -289,7 +290,8 @@ instance MonadTrans (ReaderT r) where
 class Monad m => MonadIO m where
   liftIO :: IO a -> m a
   -- может показаться, что она стирает нечистоту IO, но, на самом деле,
-  -- она нужна только потому, что обычно у вас IO в самом конце цепочки трансформеров,
+  -- она нужна только потому, что обычно у вас IO в самом конце
+  -- цепочки трансформеров,
   -- поэтому мы здесь будем поднимать монаду с самого низа, в самый вверх
 ```
 

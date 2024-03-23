@@ -15,21 +15,21 @@
 
 ### Основные билеты
 
-* [Билет №1-2: Basic Syntax](lectures/L2-BasicSyntax.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №3: Datas, Classes, Instances](lectures/L3-DatasClassesInstances.md): [@Nomad192](https://github.com/Nomad192)
-* [Билет №4: Basic typeclasses: Monoid. Functor. Applicative](lectures/L4-MonoidFunctorApplicative.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №5: Monads](lectures/L5-Monads.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №6: RealWorld](lectures/L6-RealWorld.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №7: Monad Transformers](lectures/L7-MonadTransformers.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №8: Speeding up Haskell](lectures/L8-SpeedingUpHaskell.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №9: Parallel and Concurrent Haskell](lectures/L9-ParallelConcurrent.md): [@Nomad192](https://github.com/Nomad192)
-* [Билет №11: Brand new DSL world](lectures/L11-BrandNewDSLWorld.md): [@sfbakturin](https://github.com/sfbakturin)
-* [Билет №12: Some fun with kinds](lectures/L12-Kinds.md): [@SotnikovMaksim](https://github.com/SotnikovMaksim)
-* [Билет №13: Comonads](lectures/L13-Comonads.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №1-2: Basic Syntax](sources/L2-BasicSyntax.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №3: Datas, Classes, Instances](sources/L3-DatasClassesInstances.md): [@Nomad192](https://github.com/Nomad192)
+* [Билет №4: Basic typeclasses: Monoid. Functor. Applicative](sources/L4-MonoidFunctorApplicative.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №5: Monads](sources/L5-Monads.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №6: RealWorld](sources/L6-RealWorld.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №7: Monad Transformers](sources/L7-MonadTransformers.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №8: Speeding up Haskell](sources/L8-SpeedingUpHaskell.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №9: Parallel and Concurrent Haskell](sources/L9-ParallelConcurrent.md): [@Nomad192](https://github.com/Nomad192)
+* [Билет №11: Brand new DSL world](sources/L11-BrandNewDSLWorld.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №12: Some fun with kinds](sources/L12-Kinds.md): [@SotnikovMaksim](https://github.com/SotnikovMaksim)
+* [Билет №13: Comonads](sources/L13-Comonads.md): [@sfbakturin](https://github.com/sfbakturin)
 
 ### Дополнительные билеты
 
-* [Билет №5.5: Parsers Combinators](lectures/L5-Parsers.md): [@sfbakturin](https://github.com/sfbakturin)
+* [Билет №5.5: Parsers Combinators](sources/L5-Parsers.md): [@sfbakturin](https://github.com/sfbakturin)
 
 *Обратите внимание*: в силу особенностей отображения $\LaTeX$ в веб-версии GitHub, некоторые части билетов могут выглядеть странно или нечитаемо. Рекомендуется [прочитать про сборку](#сборка).
 
@@ -54,5 +54,5 @@ bash build.sh # сборка и трансляция Markdown документо
 Инструкция.
 
 1. Создать [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) репозитория.
-2. Закоммитить изменения билета/билетов на ветку **`dev`**.
+2. Закоммитить изменения билета/билетов.
 3. Создать Pull Request на ветку **`dev`** с описанием того, что было изменено, и дожидаться ответа и/или комментариев от других участников проекта (все Pull Request'ы, предлагающие объединение на ветку `main` не будут рассматриваться).
